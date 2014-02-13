@@ -8,6 +8,6 @@ Running
 
 From the root directory, run
 
-> python main.py
+    python main.py
 
 Note that this should be python 3
