@@ -6,8 +6,15 @@ Finds a short regex to match strings from one list and none from another, inspir
 Running
 -------
 
-From the root directory, run
+From the root directory, run, with python 3:
 
     python main.py
 
-Note that this should be python 3
+Strings to match and to not match can be found in, respectively:
+
+    good_strings.txt
+    bad_strings.txt
+
+Settings like probability distributions and time spent on searching can be found in:
+
+    metareg/settings.py
