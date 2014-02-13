@@ -18,12 +18,24 @@ def matched_strings(regex, strings):
 
 def random_substring(string):
     ''' Random substring from a string '''
-    start_index = random.randrange(len(string))
-    substring_length = min(
+    # Length of string with ^ and $ anchor tags
+    length = len(string) + 2
+    start_index = random.randrange(length)
+    end_index = start_index + min(
         round(settings.substring_length_dist()),
-        len(string) - start_index
+        length - start_index
     )
-    return re.escape(string[start_index:start_index + substring_length])
+    substring = re.escape(
+        # This seems needlessly complicated, but the idea is that any characters
+        # within the string can be escaped without escaping ^ and $ anchor tags
+        # and just adding them to the resulting string
+        string[max(start_index - 1, 0) : min(end_index - 1, len(string) - 1)]
+    )
+    if start_index == 0:
+        substring = "^" + substring
+    if start_index == length - 1:
+        substring += "$"
+    return substring
 
 
 def dotify_character(c):
@@ -34,6 +46,7 @@ def dotify_character(c):
 
 
 def regex_characters(regex):
+    ''' Yield individual characters from a regex including escaped characters '''
     buffer = ""
     for c in regex:
         buffer += c
@@ -67,7 +80,7 @@ def regex_components(good_strings, bad_strings):
     parts = {
         p for p in generate_until(
             settings.time_limit_regex_components,
-            random_regex_component_generator(wholes)
+            random_regex_component_generator(good_strings)
         ) if not does_match(p, bad_strings)
     }
     return wholes.union(parts)
