@@ -1,4 +1,5 @@
 ''' Project test fixtures to be run with nosetests '''
+import re
 from . import metareg
 
 
@@ -24,4 +25,4 @@ def test_matched_strings():
 
 def test_random_substring():
     string = "sixteen sandwiches"
-    assert all(metareg.random_substring(string) in string for _ in range(100))
+    assert all(re.search(metareg.random_substring(string), string) for _ in range(100))
