@@ -1,4 +1,5 @@
 from metareg.metareg import find_regex, verify
+from metareg import metareg, settings, util
 
 
 def lines_from_file(filename):
@@ -6,9 +7,14 @@ def lines_from_file(filename):
         return {l.strip() for l in f}
 
 
-def main():
+def get_strings():
     good_strings = lines_from_file("good_strings.txt")
     bad_strings = lines_from_file("bad_strings.txt") - good_strings
+    return good_strings, bad_strings
+
+
+def main():
+    good_strings, bad_strings = get_strings()
     regex = find_regex(good_strings, bad_strings)
     if verify(regex, good_strings, bad_strings):
         print("Solution found (%s chars): %s" % (len(regex), regex))
