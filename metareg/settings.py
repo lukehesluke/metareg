@@ -1,5 +1,6 @@
 from .util import half_normal_distribution
 
+escape_characters = {"$", "^", "\\", ".", "*", "+", "(", ")", "[", "]", "?"}
 # Probability of turning a character in a regex component into a dot
 prob_dotify = 0.25
 # Distribution used to determine length of regex components

@@ -19,7 +19,6 @@ def test_does_match():
 
 
 def test_matched_strings():
-    strings = {"bread", "regale", "fence"}
     matches = {
         "re": {"bread", "regale"},
         "e$": {"regale", "fence"},
@@ -27,7 +26,13 @@ def test_matched_strings():
         "^en": set(),
         "b.y": set()
     }
-    assert all(metareg.matched_strings(k, strings) == v for k, v in matches.items())
+    assert all(metareg.matched_strings(k, GOOD_STRINGS) == v for k, v in matches.items())
+
+
+def test_escape():
+    string = "abcdef.+*(ghi)?"
+    expected = r"abcdef\.\+\*\(ghi\)\?"
+    assert metareg.escape(string) == expected
 
 
 def test_regex_characters():
@@ -43,10 +48,7 @@ def test_random_substring():
 
 def test_random_regex_component_generator():
     components = itertools.islice(metareg.random_regex_component_generator(GOOD_STRINGS), 200)
-    #assert all(metareg.does_match(c, GOOD_STRINGS) for c in components)
-    for c in components:
-        if not metareg.does_match(c, GOOD_STRINGS):
-            assert False, c
+    assert all(metareg.does_match(c, GOOD_STRINGS) for c in components)
 
 
 def test_verify():

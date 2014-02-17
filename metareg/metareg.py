@@ -17,6 +17,18 @@ def matched_strings(regex, strings):
     return {s for s in strings if re.search(regex, s)}
 
 
+def escape(string):
+    '''
+    Escape special regex characters in a string
+    re.escape escapes all characters that are neither ASCII letters,
+    numbers or '_'. This results in too many backslashes, unnecessarily
+    increasing the size of the resulting regex
+    '''
+    return "".join(
+        "\\" + c if c in settings.escape_characters else c for c in string
+    )
+
+
 def random_substring(string):
     ''' Random substring from a string '''
     # Length of string with ^ and $ anchor tags
@@ -26,11 +38,8 @@ def random_substring(string):
         round(settings.substring_length_dist()),
         length - start_index
     )
-    substring = re.escape(
-        # This seems needlessly complicated, but the idea is that any characters
-        # within the string can be escaped without escaping ^ and $ anchor tags
-        # and just adding them to the resulting string
-        string[max(start_index - 1, 0) : min(end_index - 1, len(string) - 1)]
+    substring = escape(
+        string[max(start_index - 1, 0):min(end_index - 1, len(string))]
     )
     if start_index == 0:
         substring = "^" + substring
