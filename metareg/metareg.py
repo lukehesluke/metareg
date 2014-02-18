@@ -86,7 +86,7 @@ def regex_components(good_strings, bad_strings):
     'good' strings, while matching none of the 'bad'
     '''
     # Whole matches for each string
-    wholes = {"^%s$" % (s,) for s in good_strings}
+    wholes = {"^{0}$".format(s) for s in good_strings}
     parts = {
         p for p in generate_until(
             settings.time_limit_regex_components,
