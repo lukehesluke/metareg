@@ -1,7 +1,13 @@
 metareg
 =======
 
-Finds a short regex to match strings from one list and none from another, inspired by [Peter Norvig's](http://nbviewer.ipython.org/url/norvig.com/ipython/xkcd1313.ipynb)
+Finds a short regex to match strings from one list and none from another, inspired by [Peter Norvig's](http://nbviewer.ipython.org/url/norvig.com/ipython/xkcd1313.ipynb).
+
+This Meta-Regex Golf solution differs from Norvig's in a number of ways:
+
+* Randomness element when generating regex components, allowing components to be of any size
+* Based on the weighted set cover problem rather than vanilla set cover
+* Uses simulated annealing to improve upon greedy solution
 
 Running
 -------
