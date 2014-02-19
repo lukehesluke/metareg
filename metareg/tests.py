@@ -1,9 +1,8 @@
 ''' Project test fixtures to be run with nosetests '''
-import copy
 import itertools
 import re
 
-from . import metareg, settings
+from . import metareg
 
 
 # Constants used by tests
@@ -32,13 +31,7 @@ def test_matched_strings():
 def test_escape():
     string = "abcdef.+*(ghi)?"
     expected = r"abcdef\.\+\*\(ghi\)\?"
-    assert metareg.escape(string) == expected
-
-
-def test_regex_characters():
-    regex = r"^ham\. \$4$"
-    expected = ["^", "h", "a", "m", r"\.", " ", "\$", "4", "$"]
-    assert list(metareg.regex_characters(regex)) == expected
+    assert "".join(metareg.escape(c) for c in string) == expected
 
 
 def test_random_substring():

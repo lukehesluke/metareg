@@ -3,8 +3,7 @@ import math
 import random
 import re
 
-from . import settings
-from .util import generate_until
+from . import settings, util
 
 
 def does_match(regex, strings):
@@ -17,53 +16,42 @@ def matched_strings(regex, strings):
     return {s for s in strings if re.search(regex, s)}
 
 
-def escape(string):
+def escape(char):
     '''
-    Escape special regex characters in a string
+    Escape special regex character
     re.escape escapes all characters that are neither ASCII letters,
     numbers or '_'. This results in too many backslashes, unnecessarily
     increasing the size of the resulting regex
     '''
-    return "".join(
-        "\\" + c if c in settings.escape_characters else c for c in string
-    )
+    return "\\" + char if char in settings.escape_characters else char
+
+
+def dotify(char):
+    ''' Randomly return character or a dot '''
+    return "." if random.random() < settings.prob_dotify else char
+
+
+def repeat(char):
+    '''
+    Possibly repeat a regex character
+    Appends a +, * or a ? to the character with a low probability
+    '''
+    return char + util.one_of(settings.repeat_character_probs, "")
 
 
 def random_substring(string):
     ''' Random substring from a string '''
-    # Length of string with ^ and $ anchor tags
-    length = len(string) + 2
-    start_index = random.randrange(length)
-    end_index = start_index + min(
-        round(settings.substring_length_dist()),
-        length - start_index
-    )
-    substring = escape(
-        string[max(start_index - 1, 0):min(end_index - 1, len(string))]
-    )
+    # Length of string plus ^ and $ anchor tags
+    total_length = len(string) + 2
+    start_index = random.randrange(total_length)
+    end_index = start_index + round(settings.substring_length_dist())
+    raw_substring = string[max(start_index - 1, 0):end_index - 1]
+    substring = "".join(repeat(dotify(escape(c))) for c in raw_substring)
     if start_index == 0:
         substring = "^" + substring
-    if end_index == length - 1:
+    if end_index >= total_length - 1:
         substring += "$"
     return substring
-
-
-def dotify_character(c):
-    ''' Randomly return character or a dot '''
-    if c in "^$":
-        return c
-    return "." if random.random() < settings.prob_dotify else c
-
-
-def regex_characters(regex):
-    ''' Yield individual characters from a regex including escaped characters '''
-    buffer = ""
-    for c in regex:
-        buffer += c
-        if buffer == "\\":
-            continue
-        yield buffer
-        buffer = ""
 
 
 def random_regex_component_generator(strings):
@@ -75,9 +63,7 @@ def random_regex_component_generator(strings):
     string_list = list(strings)
     while True:
         string = random.choice(string_list)
-        substring = random_substring(string)
-        dotified = "".join(dotify_character(c) for c in regex_characters(substring))
-        yield dotified
+        yield random_substring(string)
 
 
 def regex_components(good_strings, bad_strings):
@@ -88,7 +74,7 @@ def regex_components(good_strings, bad_strings):
     # Whole matches for each string
     wholes = {"^{0}$".format(s) for s in good_strings}
     parts = {
-        p for p in generate_until(
+        p for p in util.generate_until(
             settings.time_limit_regex_components,
             random_regex_component_generator(good_strings)
         ) if not does_match(p, bad_strings)
@@ -196,7 +182,7 @@ def verify(regex, good_strings, bad_strings):
 
 def improve_solution(solution, good_strings, bad_strings, components):
     ''' Find the best solution from a simulated annealing run '''
-    simulated_annealer = generate_until(
+    simulated_annealer = util.generate_until(
         settings.time_limit_simulated_annealing,
         simulated_annealing_generator(solution, good_strings, bad_strings, components)
     )
