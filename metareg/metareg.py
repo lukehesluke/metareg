@@ -8,12 +8,14 @@ from . import settings, util
 
 def does_match(regex, strings):
     ''' Does regex match any from a collection of strings? '''
-    return any(re.search(regex, s) for s in strings)
+    compiled = re.compile(regex)
+    return any(re.search(compiled, s) for s in strings)
 
 
 def matched_strings(regex, strings):
     ''' Set of strings matched by regex '''
-    return {s for s in strings if re.search(regex, s)}
+    compiled = re.compile(regex)
+    return {s for s in strings if re.search(compiled, s)}
 
 
 def escape(char):
@@ -174,8 +176,9 @@ def simulated_annealing_generator(solution, good_strings, bad_strings, regex_com
 
 def verify(regex, good_strings, bad_strings):
     ''' Verify that regex matches all good strings but no bad '''
+    compiled = re.compile(regex)
     return (
-        all(re.search(regex, s) for s in good_strings) and
+        all(re.search(compiled, s) for s in good_strings) and
         not does_match(regex, bad_strings)
     )
 
