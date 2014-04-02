@@ -14,12 +14,11 @@ Running
 
 From the root directory, run, with python 3:
 
-    python main.py
+    python main.py <STRINGS TO MATCH> <STRINGS TO NOT MATCH>
 
-Strings to match and to not match can be found in, respectively:
+e.g.
 
-    good_strings.txt
-    bad_strings.txt
+    python main.py examples/aristotle_quotes.txt examples/gold_digger_lyrics.txt
 
 Settings like probability distributions and time spent on searching can be found in:
 
