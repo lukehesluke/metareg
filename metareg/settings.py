@@ -3,8 +3,10 @@ from .util import half_normal_distribution
 escape_characters = {"$", "^", "\\", ".", "*", "+", "(", ")", "[", "]", "?"}
 # Probability of turning a character in a regex component into a dot
 prob_dotify = 0.15
+repeat_characters = ["+", "*", "?", ""]
 # Probabilities of repeating characters in a regex component using +, * or ?
-repeat_character_probs = {"+": 0.02, "*": 0.03, "?": 0.01}
+repeat_character_probs = [0.02, 0.03, 0.01]
+repeat_character_probs.append(1 - sum(repeat_character_probs))  # Add probability that no repeat character is used
 # Distribution used to determine length of regex components
 substring_length_dist = half_normal_distribution(1, 1.75)
 # Determines number of regexes to remove from solution when looking for

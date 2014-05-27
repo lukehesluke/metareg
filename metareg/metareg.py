@@ -38,7 +38,8 @@ def repeat(char):
     Possibly repeat a regex character
     Appends a +, * or a ? to the character with a low probability
     '''
-    return char + util.one_of(settings.repeat_character_probs, "")
+    index = util.one_of(settings.repeat_character_probs)
+    return char + settings.repeat_characters[index]
 
 
 def random_substring(string):
