@@ -68,18 +68,18 @@ def random_regex_component_generator(strings):
         yield random_substring(string)
 
 
-def regex_components(good_strings, bad_strings):
+def regex_components(match_these, dont_match_these):
     '''
     Generate a set of regex components which each match one or more of the
     'good' strings, while matching none of the 'bad'
     '''
     # Whole matches for each string
-    wholes = {"^{0}$".format(s) for s in good_strings}
+    wholes = {"^{0}$".format(s) for s in match_these}
     parts = {
         p for p in util.generate_until(
             settings.time_limit_regex_components,
-            random_regex_component_generator(good_strings)
-        ) if not does_match(p, bad_strings)
+            random_regex_component_generator(match_these)
+        ) if not does_match(p, dont_match_these)
     }
     return wholes.union(parts)
 
@@ -160,48 +160,48 @@ def move_to_neighbour_solution(current, neighbour, inverse_temperature, strings_
     return random.random() < math.exp(inertia)
 
 
-def simulated_annealing_generator(solution, good_strings, bad_strings, regex_components):
+def simulated_annealing_generator(solution, match_these, dont_match_these, regex_components):
     '''
     Use simulated annealing to generate improved solutions after greedy
     search
     '''
     inverse_temperature = (yield solution)
     while True:
-        neighbour = neighbour_solution(solution, good_strings, regex_components)
-        strings_missed = len(good_strings) - len(matched_strings("|".join(neighbour), good_strings))
+        neighbour = neighbour_solution(solution, match_these, regex_components)
+        strings_missed = len(match_these) - len(matched_strings("|".join(neighbour), match_these))
         if move_to_neighbour_solution(solution, neighbour, inverse_temperature, strings_missed):
             solution = neighbour
         inverse_temperature = (yield solution)
 
 
-def verify(regex, good_strings, bad_strings):
+def verify(regex, match_these, dont_match_these):
     ''' Verify that regex matches all good strings but no bad '''
     compiled = re.compile(regex)
     return (
-        all(re.search(compiled, s) for s in good_strings) and
-        not does_match(regex, bad_strings)
+        all(re.search(compiled, s) for s in match_these) and
+        not does_match(regex, dont_match_these)
     )
 
 
-def improve_solution(solution, good_strings, bad_strings, components):
+def improve_solution(solution, match_these, dont_match_these, components):
     ''' Find the best solution from a simulated annealing run '''
     simulated_annealer = util.generate_until(
         settings.time_limit_simulated_annealing,
-        simulated_annealing_generator(solution, good_strings, bad_strings, components)
+        simulated_annealing_generator(solution, match_these, dont_match_these, components)
     )
 
     def is_improved_solution(best_so_far, new):
         new_regex = "|".join(new)
-        if len(new_regex) < len("|".join(best_so_far)) and verify(new_regex, good_strings, bad_strings):
+        if len(new_regex) < len("|".join(best_so_far)) and verify(new_regex, match_these, dont_match_these):
             return new
         else:
             return best_so_far
     return functools.reduce(is_improved_solution, simulated_annealer)
 
 
-def find_regex(good_strings, bad_strings):
-    ''' Find short regex to match all good strings but no bad '''
-    components = regex_components(good_strings, bad_strings)
-    cover = greedy_weighted_set_cover(good_strings, components)
-    improved = improve_solution(cover, good_strings, bad_strings, components)
+def find_regex(match_these, dont_match_these):
+    ''' Find short regex to match all of one set of strings but none of the other '''
+    components = regex_components(match_these, dont_match_these)
+    cover = greedy_weighted_set_cover(match_these, components)
+    improved = improve_solution(cover, match_these, dont_match_these, components)
     return "|".join(improved)

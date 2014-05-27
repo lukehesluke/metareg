@@ -6,15 +6,15 @@ from . import metareg
 
 
 # Constants used by tests
-GOOD_STRINGS = {"bread", "regale", "fence"}
-BAD_STRINGS = {"hamburger", "tense", "murphy"}
+MATCH_THESE = {"bread", "regale", "fence"}
+DONT_MATCH_THESE = {"hamburger", "tense", "murphy"}
 
 
 def test_does_match():
-    good_matches = ["^br", "e.ce", "le$"]
-    bad_matches = ["^en", "b.y", "rt$"]
-    assert all(metareg.does_match(r, GOOD_STRINGS) for r in good_matches)
-    assert not any(metareg.does_match(r, GOOD_STRINGS) for r in bad_matches)
+    match_these = ["^br", "e.ce", "le$"]
+    dont_match_these = ["^en", "b.y", "rt$"]
+    assert all(metareg.does_match(r, MATCH_THESE) for r in match_these)
+    assert not any(metareg.does_match(r, MATCH_THESE) for r in dont_match_these)
 
 
 def test_matched_strings():
@@ -25,7 +25,7 @@ def test_matched_strings():
         "^en": set(),
         "b.y": set()
     }
-    assert all(metareg.matched_strings(k, GOOD_STRINGS) == v for k, v in matches.items())
+    assert all(metareg.matched_strings(k, MATCH_THESE) == v for k, v in matches.items())
 
 
 def test_escape():
@@ -40,10 +40,10 @@ def test_random_substring():
 
 
 def test_random_regex_component_generator():
-    components = itertools.islice(metareg.random_regex_component_generator(GOOD_STRINGS), 200)
-    assert all(metareg.does_match(c, GOOD_STRINGS) for c in components)
+    components = itertools.islice(metareg.random_regex_component_generator(MATCH_THESE), 200)
+    assert all(metareg.does_match(c, MATCH_THESE) for c in components)
 
 
 def test_verify():
-    assert metareg.verify("^br|e.ce|le$", GOOD_STRINGS, BAD_STRINGS)
-    assert not metareg.verify("^br|en.e|le$", GOOD_STRINGS, BAD_STRINGS)
+    assert metareg.verify("^br|e.ce|le$", MATCH_THESE, DONT_MATCH_THESE)
+    assert not metareg.verify("^br|en.e|le$", MATCH_THESE, DONT_MATCH_THESE)
