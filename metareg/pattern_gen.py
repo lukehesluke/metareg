@@ -1,5 +1,7 @@
 import re
 
+from metareg.util import half_normal_distribution
+
 ESCAPE_CHARACTERS = {
 	'.', '*', '+', '?',
 	'^', '$',
@@ -13,6 +15,9 @@ DOTIFY_CHANCE = 0.05
 
 REPEAT_CHARACTERS = ['', '*', '+', '?']
 REPEAT_CHANCES = [94, 2, 2, 2]
+
+# Distribution used to determine length of regex components
+SUBSTRING_LENGTH_DIST = half_normal_distribution(1, 1.75)
 
 
 def does_match(regex, strings):
@@ -55,5 +60,22 @@ def create_pattern(string):
 	''' Create random pattern matching string '''
 	glyphs = '^' + [repeat(dotify(escape(c))) for c in string] + '$'
 	start_index = random.randrange(len(glyphs) - 1)
-	# TODO
-	#length = max(start_index - 1, 1
+	end_index = start_index + round(SUBSTRING_LENGTH_DIST())
+	length = round(SUBSTRING_LENGTH_DIST())
+	return ''.join(string[start_index:end_index])
+
+
+def pattern_generator(match_these, dont_match_these):
+	'''
+	Generate random patterns that match match_these but not dont_match_these
+	This generator will go on forever
+	'''
+	for whole in ('^{0}$'.format(s) for s in match_these):
+		yield whole
+	match_these_list = list(match_these)
+	while True:
+		string = random.choice(match_these_list)
+		pattern = create_pattern(string)
+		# Only yield pattern if it doesn't match anything it shouldn't
+		if not does_match(string, dont_match_these):
+			yield create_pattern(string)
